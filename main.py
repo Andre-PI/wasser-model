@@ -55,9 +55,14 @@ def main():
         2: "Biscoito",
         3: "Pipoca",
         4: "Bolinha",
-        5: "Urso",
-        6: "Pé de Pano",
+        5: "Pé de Pano",
+        6:"Nica",
+        7:"Betsy",
+        8:"Caramelo",
+        9:"Branquinha",
+        10:"Azeite",
     }
+    
 
     print("Pronto para iniciar o rastreamento...")
 
