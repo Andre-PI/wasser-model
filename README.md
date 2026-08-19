@@ -39,18 +39,26 @@ Fluxo principal em `main.py`:
   - `ultralytics`
   - `opencv-python`
 
-## Setup recomendado (com ambiente virtual)
+## Setup recomendado (via uv ⚡️)
 
-No diretorio do projeto:
+Para garantir instalações extremamente rápidas, recomendamos o uso do [uv](https://github.com/astral-sh/uv) como gerenciador.
 
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-```
+1. Instale o `uv` globalmente na sua máquina (caso ainda não tenha):
+   ```bash
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+   # Ou via Homebrew no Mac: brew install uv
+   ```
 
-Para desativar o ambiente virtual:
+2. Crie e ative o ambiente virtual, e instale as dependências:
+   ```bash
+   uv venv
+   source .venv/bin/activate
+   uv pip install -r requirements.txt
+   ```
+
+> **Nota:** Se você preferir o método tradicional, o projeto continua 100% compatível com o fluxo padrão (`python3 -m venv venv` e `pip install -r requirements.txt`).
+
+Para desativar o ambiente virtual a qualquer momento:
 
 ```bash
 deactivate
