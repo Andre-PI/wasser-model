@@ -18,7 +18,7 @@ DEFAULT_CATTLE_NAMES = {
     3: "Pipoca",
     4: "Bolinha",
     5: "Urso",
-    6: "Pe de Pano",
+    6: "Pé de Pano",
 }
 
 
