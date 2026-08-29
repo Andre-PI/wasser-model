@@ -9,6 +9,11 @@ dependencies = [
     "numpy>=2.1.0",
     "opencv-python>=5.0.0.93",
     "streamlit>=1.40.0",
+    # torch/torchvision sao declarados explicitamente para que o index
+    # pytorch-cpu abaixo seja aplicado. Como transitivas do ultralytics,
+    # [tool.uv.sources] nao vale e o uv resolve para o build CUDA (+7GB).
+    "torch>=2.13.0",
+    "torchvision>=0.28.0",
     "ultralytics>=8.4.117",
 ]
 

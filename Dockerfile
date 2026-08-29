@@ -19,6 +19,10 @@ COPY . .
 
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Sem isto o Ultralytics tenta escrever em /root/.config e cai para /tmp
+# com aviso a cada start.
+ENV YOLO_CONFIG_DIR=/tmp/Ultralytics
+
 # Os pesos .pt nao estao versionados (.gitignore) nem entram na imagem
 # (.dockerignore). Monte-os em runtime, ex.:
 #   docker run -p 8501:8501 \
