@@ -14,6 +14,27 @@ COW_CLASS_ID = 19  # indice "cow" no COCO, usado pelos pesos genericos
 CATTLE_CLASS_ID = 0  # indice unico dos pesos fine-tunados (ver training/)
 DEFAULT_CLASS_IDS = [COW_CLASS_ID]
 
+
+def resolve_device(device=None):
+    """Escolhe o acelerador disponivel: CUDA (NVIDIA), MPS (Apple) ou CPU.
+
+    Passe um valor explicito ("cuda", "mps", "cpu", "0") para forcar.
+    O suporte a CUDA depende do extra instalado: uv sync --extra cu130.
+    Com --extra cpu o torch nao tem CUDA e a deteccao cai para CPU.
+    """
+    if device:
+        return device
+
+    import torch
+
+    if torch.cuda.is_available():
+        return "cuda"
+    mps = getattr(torch.backends, "mps", None)
+    if mps is not None and mps.is_available():
+        return "mps"
+    return "cpu"
+
+
 DEFAULT_CATTLE_NAMES = {
     1: "Mimosa",
     2: "Biscoito",
@@ -130,10 +151,12 @@ def process_video(
     imgsz=DEFAULT_INFERENCE_SIZE,
     preview_interval=5,
     class_ids=None,
+    device=None,
 ):
     # Pesos genericos (COCO) usam a classe 19; pesos fine-tunados em uma
     # unica classe usam 0. Ver training/README.md.
     class_ids = list(DEFAULT_CLASS_IDS if class_ids is None else class_ids)
+    device = resolve_device(device)
     validate_processing_inputs(video_path, model_path, tracker_path)
 
     model = model or load_model(model_path)
@@ -175,6 +198,7 @@ def process_video(
                 tracker=tracker_path,
                 classes=class_ids,
                 imgsz=imgsz,
+                device=device,
                 verbose=False,
             )
 

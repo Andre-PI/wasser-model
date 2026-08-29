@@ -34,8 +34,8 @@ uv run python training/pre_annotate.py --imgsz 1280 --conf 0.25
 # 4. Divide em train/val
 uv run python training/split_dataset.py --val-ratio 0.2
 
-# 5. Treina
-uv run python training/train.py --epochs 100 --imgsz 1280 --device 0
+# 5. Treina (o device e detectado sozinho: cuda -> mps -> cpu)
+uv run python training/train.py --epochs 100 --imgsz 1280
 ```
 
 ## O passo 3 nao e opcional
@@ -71,3 +71,22 @@ Os pesos saem em `runs/<name>/weights/best.pt`. Para usar:
 
 O ReID do tracker (`model:` em `wasser_tracker.yaml`) continua usando os
 pesos genericos de classificacao — e independente do detector.
+
+## GPU no treino
+
+O `train.py` detecta o acelerador sozinho e imprime qual escolheu. Para
+forcar, use `--device cuda`, `--device mps` ou `--device cpu`.
+
+CUDA depende do extra instalado -- com `uv sync --extra cpu` o torch nao tem
+CUDA e a deteccao cai para CPU, por mais que a GPU exista na maquina. Para
+treinar na NVIDIA:
+
+```bash
+uv sync --extra cu130
+uv run python training/train.py --epochs 100 --imgsz 1280
+```
+
+No MacBook use `--extra cpu`; o Apple Silicon acelera via MPS, que a
+deteccao encontra automaticamente. Treinar em CPU pura e lento -- na medicao
+do README principal a inferencia foi ~10x mais lenta que CUDA, e treino
+sofre na mesma proporcao.

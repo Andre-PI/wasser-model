@@ -8,6 +8,7 @@ Aponte DEFAULT_MODEL_PATH (processor.py) para esse arquivo e passe
 class_ids=[CATTLE_CLASS_ID] em process_video().
 """
 import argparse
+import sys
 from pathlib import Path
 
 import yaml
@@ -48,7 +49,8 @@ def main():
     parser.add_argument("--imgsz", type=int, default=1280,
                         help="gado de drone e objeto pequeno; 1280 detecta muito mais que 640.")
     parser.add_argument("--batch", type=int, default=4)
-    parser.add_argument("--device", default=None, help="ex.: 0 para GPU, cpu para CPU")
+    parser.add_argument("--device", default=None,
+                        help="cuda / mps / cpu / 0. Padrao: detecta automaticamente.")
     parser.add_argument("--name", default="wasser-cattle")
     args = parser.parse_args()
 
@@ -56,6 +58,15 @@ def main():
         raise SystemExit(f"dataset.yaml nao encontrado: {args.data}")
 
     data_yaml = resolve_dataset_yaml(args.data)
+
+    sys.path.insert(0, str(REPO))
+    from processor import resolve_device
+
+    device = resolve_device(args.device)
+    print(f"Device: {device}")
+    if device == "cpu":
+        print("AVISO: treino em CPU e lento. Com GPU NVIDIA instale o"
+              " extra CUDA: uv sync --extra cu130")
 
     model = YOLO(args.base_model)
     results = model.train(
@@ -66,7 +77,7 @@ def main():
         epochs=args.epochs,
         imgsz=args.imgsz,
         batch=args.batch,
-        device=args.device,
+        device=device,
         name=args.name,
         # Vista aerea nao tem "cima" canonico: rotacao e flip vertical sao
         # aumentos validos aqui, ao contrario de fotos de nivel do chao.

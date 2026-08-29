@@ -10,6 +10,7 @@ from processor import (
     DEFAULT_TRACKER_PATH,
     load_model,
     process_video,
+    resolve_device,
 )
 
 
@@ -684,6 +685,20 @@ with st.sidebar:
     )
     counter_mode = "acumulado" if counter_mode_label == "Accumulated total" else "frame"
 
+    device_label = st.radio(
+        "Processing device",
+        options=("Auto", "GPU (CUDA)", "GPU (Apple MPS)", "CPU"),
+        index=0,
+        help="Auto usa CUDA, depois MPS, depois CPU. CUDA exige o extra cu130 instalado.",
+    )
+    device = {
+        "Auto": None,
+        "GPU (CUDA)": "cuda",
+        "GPU (Apple MPS)": "mps",
+        "CPU": "cpu",
+    }[device_label]
+    st.caption(f"Em uso: {resolve_device(device)}")
+
 render_html(
     """
     <div class="top-header">
@@ -822,6 +837,7 @@ if process_clicked and uploaded_video is not None:
             preview_callback=update_preview,
             output_heatmap_path=heatmap_path,
             imgsz=inference_size,
+            device=device,
         )
     except Exception as exc:
         st.session_state.status_label = "Error"

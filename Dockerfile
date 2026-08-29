@@ -12,8 +12,11 @@ COPY --from=ghcr.io/astral-sh/uv:0.11.21 /uv /uvx /bin/
 COPY pyproject.toml uv.lock ./
 
 ENV UV_LINK_MODE=copy
+# --extra cpu e obrigatorio: torch/torchvision ficam nos extras, entao sem ele
+# a imagem sairia sem torch. CPU e o certo aqui -- usar CUDA no container
+# exigiria nvidia-container-toolkit e +7GB de imagem.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev
+    uv sync --frozen --no-install-project --no-dev --extra cpu
 
 COPY . .
 

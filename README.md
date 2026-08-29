@@ -44,10 +44,22 @@ Para instalacoes rapidas, use o [uv](https://github.com/astral-sh/uv):
    # Ou via Homebrew no Mac: brew install uv
    ```
 
-2. Sincronize o ambiente a partir do `uv.lock`:
+2. Sincronize escolhendo **um** extra, conforme a sua maquina:
+
    ```bash
-   uv sync
+   # CPU. Serve em qualquer lugar; e o que o MacBook usa
+   # (no macOS este wheel ja traz aceleracao MPS/Metal).
+   uv sync --extra cpu
+
+   # GPU NVIDIA (Windows/Linux). CUDA 13.0.
+   uv sync --extra cu130
    ```
+
+   Os dois extras sao mutuamente exclusivos -- o `uv` recusa instalar ambos.
+   Se voce trocar de extra, rode o `uv sync` de novo: ele substitui o torch.
+
+   > **Mac nao tem CUDA.** Apple Silicon acelera via MPS (Metal), que ja vem
+   > no wheel do extra `cpu`. Use `--extra cpu` no Mac.
 
 3. Rode os comandos com `uv run` (dispensa ativar venv):
    ```bash
@@ -61,6 +73,12 @@ Para instalacoes rapidas, use o [uv](https://github.com/astral-sh/uv):
 python3 -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install --upgrade pip
+
+# Escolha a variante do torch (o requirements.txt nao a define):
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# ou, com GPU NVIDIA:
+# pip install torch torchvision --index-url https://download.pytorch.org/whl/cu130
+
 pip install -r requirements.txt
 ```
 
@@ -106,10 +124,30 @@ A imagem sobe o Streamlit em `0.0.0.0:8501`. Como os `.pt` sao excluidos pelo `.
 - Trocar video/modelo/tracker padrao: constantes `DEFAULT_*` no topo de `processor.py`.
 - Ajustar comportamento do tracking: `wasser_tracker.yaml`.
 - Aumentar `imgsz` (960/1280) ajuda na deteccao de animais pequenos em filmagem de drone, ao custo de velocidade.
+- Escolher o acelerador: `device=` em `process_video()`, ou o seletor
+  "Processing device" na barra lateral da interface. O padrao detecta
+  sozinho, na ordem CUDA -> MPS -> CPU.
+
+## Desempenho medido
+
+20 frames do video de teste, `yolo26x.pt` em `imgsz=1280`, nesta maquina
+(RTX 4050 Laptop, 6GB):
+
+| device | tempo | por frame |
+| --- | --- | --- |
+| cpu | 130.0s | 6.50s |
+| cuda | 12.4s | **0.62s** |
+
+Cerca de 10x. Para processar video de verdade, ou para treinar, use GPU.
 
 ## Limitacoes conhecidas
 
-- A deteccao usa a classe 19 ("cow") do COCO, um modelo generico treinado em fotos de nivel do chao. Em filmagem aerea a precisao cai; um fine-tune com dados de drone e o maior ganho possivel.
+- **A deteccao nao funciona com os pesos genericos neste caso de uso.**
+  Medido no video de teste com `yolo26x.pt`: em `imgsz=640` (o padrao) saem
+  **zero** deteccoes; em `imgsz=1280` saem 37, todas rotuladas `bird`. As
+  caixas caem em cima do gado, mas o COCO classifica boi visto de cima como
+  passaro -- e o pipeline filtra `classes=[19]` ("cow"), entao o contador
+  fica em zero. Ver `training/README.md` para o fine-tune que resolve.
 - A contagem acumulada cresce a cada novo ID do tracker: se um animal e perdido e reencontrado com ID novo, ele conta duas vezes. O `track_buffer: 3000` do `wasser_tracker.yaml` mitiga, mas nao elimina.
 - O filtro de tempo da interface ainda nao altera o processamento (ver CT18/CT19/CT25 no relatorio de testes).
 - O projeto nao faz estimativa de peso.
@@ -117,5 +155,11 @@ A imagem sobe o Streamlit em `0.0.0.0:8501`. Como os `.pt` sao excluidos pelo `.
 ## Solucao de problemas
 
 - **Erro de arquivo nao encontrado**: confira video, tracker e pesos `.pt`.
-- **Erro de dependencia**: rode `uv sync` novamente (ou reinstale o `requirements.txt`).
+- **Erro de dependencia**: rode `uv sync --extra cpu` (ou `--extra cu130`) novamente.
+- **GPU NVIDIA existe mas nao e usada**: voce esta com o extra CPU. Rode
+  `uv sync --extra cu130`. Confira com
+  `uv run python -c "import torch; print(torch.cuda.is_available())"`.
+- **No Mac o device sai como `cpu`**: confirme que e Apple Silicon e que o
+  torch enxerga o Metal:
+  `uv run python -c "import torch; print(torch.backends.mps.is_available())"`.
 - **Janela de video nao abre** (modo terminal): verifique suporte grafico/OpenCV. A interface web nao precisa de display.
