@@ -6,7 +6,7 @@ from ultralytics import YOLO
 
 
 DEFAULT_MODEL_PATH = "yolo26x.pt"
-DEFAULT_VIDEO_PATH = "media/video-teste-wasser.mp4"
+DEFAULT_VIDEO_PATH = "videos/YTDown.com_Shorts_Video-por-drone-mostra-como-o-gado-se-mo_Media_0dqOtU8HJqg_001_720p.mp4"
 DEFAULT_TRACKER_PATH = "wasser_tracker.yaml"
 DEFAULT_OUTPUT_PATH = "resultado_wasser.mp4"
 DEFAULT_INFERENCE_SIZE = 640
@@ -102,6 +102,13 @@ def validate_processing_inputs(video_path, model_path, tracker_path):
     for label, path in (("video", video_path), ("tracker", tracker_path)):
         if not Path(path).exists():
             missing.append(f"{label}: {path}")
+
+    # Nome simples (ex.: "yolo26x.pt") fica a cargo do download automatico do
+    # Ultralytics; so validamos quando o usuario aponta um caminho explicito.
+    model_path = str(model_path)
+    is_explicit_path = "/" in model_path or "\\" in model_path
+    if is_explicit_path and not Path(model_path).exists():
+        missing.append(f"model: {model_path}")
 
     if missing:
         raise FileNotFoundError("Required files not found: " + "; ".join(missing))

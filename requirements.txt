@@ -1,4 +1,7 @@
-ultralytics
-opencv-python
-streamlit
-numpy
+# Espelho de pyproject.toml para quem instala via pip.
+# Fonte de verdade: pyproject.toml (uv). Mantenha os dois em sincronia.
+lap>=0.5.12
+numpy>=2.1.0
+opencv-python>=5.0.0.93
+streamlit>=1.40.0
+ultralytics>=8.4.117

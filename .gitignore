@@ -1,5 +1,6 @@
 # Virtual environment
 venv/
+.venv/
 
 # Python cache/bytecode
 __pycache__/
@@ -8,9 +9,17 @@ __pycache__/
 # macOS
 .DS_Store
 
+# IDEs
+.idea/
+.vscode/
+
+# Config local do Ultralytics (contem caminhos absolutos da maquina)
+.ultralytics/
+
 # Model weights (large files - not versioned in Git)
 *.pt
 
 # Media / video files (large files - not versioned in Git)
 media/
 resultado_wasser.mp4
+resultado_wasser_heatmap.jpg

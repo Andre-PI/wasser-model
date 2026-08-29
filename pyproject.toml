@@ -1,0 +1,22 @@
+[project]
+name = "wasser-model"
+version = "0.1.0"
+description = "Deteccao, rastreamento e contagem unica de gado em video (YOLO + BoT-SORT)"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "lap>=0.5.12",
+    "numpy>=2.1.0",
+    "opencv-python>=5.0.0.93",
+    "streamlit>=1.40.0",
+    "ultralytics>=8.4.117",
+]
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchvision = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
