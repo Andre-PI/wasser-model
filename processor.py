@@ -10,7 +10,9 @@ DEFAULT_VIDEO_PATH = "videos/YTDown.com_Shorts_Video-por-drone-mostra-como-o-gad
 DEFAULT_TRACKER_PATH = "wasser_tracker.yaml"
 DEFAULT_OUTPUT_PATH = "resultado_wasser.mp4"
 DEFAULT_INFERENCE_SIZE = 640
-COW_CLASS_ID = 19
+COW_CLASS_ID = 19  # indice "cow" no COCO, usado pelos pesos genericos
+CATTLE_CLASS_ID = 0  # indice unico dos pesos fine-tunados (ver training/)
+DEFAULT_CLASS_IDS = [COW_CLASS_ID]
 
 DEFAULT_CATTLE_NAMES = {
     1: "Mimosa",
@@ -127,7 +129,11 @@ def process_video(
     output_heatmap_path=None,
     imgsz=DEFAULT_INFERENCE_SIZE,
     preview_interval=5,
+    class_ids=None,
 ):
+    # Pesos genericos (COCO) usam a classe 19; pesos fine-tunados em uma
+    # unica classe usam 0. Ver training/README.md.
+    class_ids = list(DEFAULT_CLASS_IDS if class_ids is None else class_ids)
     validate_processing_inputs(video_path, model_path, tracker_path)
 
     model = model or load_model(model_path)
@@ -167,7 +173,7 @@ def process_video(
                 frame,
                 persist=True,
                 tracker=tracker_path,
-                classes=[COW_CLASS_ID],
+                classes=class_ids,
                 imgsz=imgsz,
                 verbose=False,
             )
