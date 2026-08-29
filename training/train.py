@@ -52,6 +52,12 @@ def main():
     parser.add_argument("--device", default=None,
                         help="cuda / mps / cpu / 0. Padrao: detecta automaticamente.")
     parser.add_argument("--name", default="wasser-cattle")
+    parser.add_argument("--workers", type=int, default=2,
+                        help="processos de carga de dados. Baixe para 0-2 se der MemoryError.")
+    parser.add_argument("--scale", type=float, default=0.5,
+                        help="augmentacao de escala (+/-). NAO suba muito: o gado do "
+                             "aerial-cows tem ~9px, e scale=0.9 encolhe ate 0.1x, "
+                             "reduzindo o animal a menos de 1 pixel.")
     args = parser.parse_args()
 
     if not args.data.exists():
@@ -84,6 +90,13 @@ def main():
         flipud=0.5,
         fliplr=0.5,
         degrees=180.0,
+        # Tentador subir a escala para cobrir a diferenca de altitude entre
+        # o dataset publico (~9px) e a nossa filmagem (~44px), mas nao
+        # funciona: scale alto encolhe o animal para menos de 1 pixel e
+        # destroi a amostra. A diferenca se resolve no fine-tune da etapa 2,
+        # com frames proprios.
+        scale=args.scale,
+        workers=args.workers,
     )
     pesos = Path(results.save_dir) / "weights" / "best.pt"
     print(f"\nTreino concluido. Pesos: {pesos}")

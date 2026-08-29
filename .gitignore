@@ -31,5 +31,8 @@ resultado_wasser_heatmap.jpg
 # regeneraveis. Versione-os de proposito com:
 #     git add -f training/dataset/labels/*.txt
 training/dataset/
+# Dataset publico aerial-cows: baixado por training/import_aerial_cows.py
+training/dataset_aerial_cows/
+training/dataset_aerial_cows.yaml
 training/.dataset.resolved.yaml
 runs/

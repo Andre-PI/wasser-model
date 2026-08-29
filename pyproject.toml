@@ -22,6 +22,10 @@ dependencies = [
 #
 # Nunca os dois juntos: o bloco [tool.uv] conflicts abaixo impede.
 [project.optional-dependencies]
+# Dependencias so do fluxo de treino (training/), fora do runtime do app.
+training = [
+    "datasets>=3.0.0",
+]
 cpu = [
     "torch>=2.13.0",
     "torchvision>=0.28.0",

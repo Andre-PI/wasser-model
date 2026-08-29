@@ -72,6 +72,61 @@ Os pesos saem em `runs/<name>/weights/best.pt`. Para usar:
 O ReID do tracker (`model:` em `wasser_tracker.yaml`) continua usando os
 pesos genericos de classificacao — e independente do detector.
 
+## Dataset publico: aerial-cows
+
+Para nao depender so da nossa filmagem, `import_aerial_cows.py` traz um
+dataset publico de gado em vista aerea:
+
+```bash
+uv run --extra training python training/import_aerial_cows.py
+uv run python training/train.py --data training/dataset_aerial_cows.yaml
+```
+
+- **1.383 imagens** (1.084 treino / 299 validacao), 640x640, classe unica
+- **13.035 caixas**, media de 9,4 por imagem
+- 383 imagens sem gado, uteis como negativos
+- **Licenca CC BY 4.0**: uso comercial permitido, exige atribuicao
+
+> Creditos: Omar Kapur, wwblodge, Ricardo Jenez, Justin Jeng e Jeffrey Day.
+> Via Roboflow 100, espelhado em `Francesco/aerial-cows` no Hugging Face.
+> A atribuicao e obrigatoria pela licenca -- mantenha este credito.
+
+Ele vai para `training/dataset_aerial_cows/`, **separado** de
+`training/dataset/`, que guarda os frames do nosso video. Os dois convivem de
+proposito: um treina agora, o outro serve para comparar depois em fazenda
+real.
+
+### Os dois nao sao equivalentes
+
+Medindo o tamanho do gado nos dois conjuntos:
+
+| conjunto | lado equivalente | fracao da imagem |
+| --- | --- | --- |
+| aerial-cows | 9,4 px | 1,47% |
+| nosso video | 43,5 px | 6,03% |
+
+O dataset publico foi filmado de **muito mais alto**: o gado aparece ~4,6x
+menor. Por isso o `train.py` usa `--scale 0.9` por padrao, bem acima do
+0.5 usual -- sem escala agressiva o modelo aprende so o objeto minusculo e
+nao generaliza para a nossa altitude.
+
+### Limite de dominio: raca
+
+O aerial-cows e majoritariamente gado de clima temperado, de pelagem
+malhada. No Piaui a maior parte e **nelore** (pelagem clara, cupim) e
+eventualmente **pe-duro**. Vistos de cima, contorno e cor sao diferentes.
+
+Isso nao invalida o dataset -- ele ensina o modelo a reconhecer "animal de
+quatro patas visto de cima", que e exatamente o que o COCO nao sabe fazer.
+Mas espere queda de precisao em nelore, e planeje a segunda etapa:
+
+1. Treinar no aerial-cows para ter um detector funcionando
+2. Usar esse modelo (nao o COCO) no `pre_annotate.py`, o que torna a
+   revisao humana muito mais rapida
+3. Somar frames rotulados da filmagem real e retreinar
+
+E um ciclo: cada rodada melhora o rascunho da rodada seguinte.
+
 ## GPU no treino
 
 O `train.py` detecta o acelerador sozinho e imprime qual escolheu. Para
